@@ -1,126 +1,110 @@
 // import axios from "axios";
-const BASE_URL = 'http://localhost:3000/contacts'
+const BASE_URL = 'http://localhost:3000/contacts';
 
-window.onload = function() {
+const tbody = document.querySelector('.table tbody');
+const saveContactBtn = document.querySelector('#saveContact');
 
-    let tbody = document.querySelector('#tbody')
-
-    // Get Data From Server And Fill The Table When Page Loaded
-    axios.get(BASE_URL)
-        .then(res => {
-            res.data.forEach(contact => {
-                createTDElement(contact, tbody)
-                // setInterval(function () {  console.log(contact.name);}, 3000)
-            })
-        })
-        .catch()
-        }
-
-    // Add EventListener to Save Contact Button
-    let saveContactBtn = document.querySelector('#saveContact')
-    saveContactBtn.addEventListener('click', function(){
-        createNewContact()
-    })
-
+// Add EventListener to Save Contact Button
+saveContactBtn.addEventListener('click', createNewContact);
 
 // Create New Contact Function
-function createNewContact() {
-    let nameField = document.querySelector('#nameField')
-    let phoneField = document.querySelector('#phoneField')
-    let emailField = document.querySelector('#emailField')
-    
-    let contact = {
-        name: nameField.value,
-        phone: phoneField.value,
-        email: emailField.value
-    }
+async function createNewContact() {
+  const name = document.querySelector('input[name=name]');
+  const phone = document.querySelector('input[name=phome]');
+  const email = document.querySelector('input[name=email]');
 
-    axios.post(BASE_URL, contact)
-        .then(res => {
-            let tbody = document.querySelector('#tbody')
-            createTDElement(res.data, tbody)
+  try {
+    const res = await axios.post(BASE_URL, {
+      name: name.value,
+      phone: phone.value,
+      email: email.value,
+    });
 
-            nameField.value = ''
-            phoneField.value = ''
-            emailField.value = ''
-        })
-        .catch(err => console.log(err))
+    createTDElement(res.data, tbody);
+
+    name.value = '';
+    phone.value = '';
+    email.value = '';
+  } catch (e) {
+    console.log(e);
+  }
 }
-
-
-
 
 // Creating A TR Element and Appending to it's parent Element
-
 function createTDElement(contact, parentElement) {
+  const TR = document.createElement('tr');
 
-    const TR = document.createElement('tr')
+  const tdName = document.createElement('td');
+  tdName.textContent = contact.name;
+  TR.appendChild(tdName);
 
-    const tdName = document.createElement('td')
-    tdName.innerHTML = contact.name
-    TR.appendChild(tdName)
+  const tdPhone = document.createElement('td');
+  tdPhone.textContent = contact.phone ? contact.phone : 'N/A';
+  TR.appendChild(tdPhone);
 
-    const tdPhone = document.createElement('td')
-    tdPhone.innerHTML = contact.phone ? contact.phone : 'N/A'
-    TR.appendChild(tdPhone)
+  const tdEmail = document.createElement('td');
+  tdEmail.textContent = contact.email ? contact.email : 'N/A';
+  TR.appendChild(tdEmail);
 
-    const tdEmail = document.createElement('td')
-    tdEmail.innerHTML = contact.email ? contact.email : 'N/A'
-    TR.appendChild(tdEmail)
+  const tdActions = document.createElement('td');
 
-    const tdActions = document.createElement('td')
+  const tdEditBtn = document.createElement('button');
+  tdEditBtn.classList.add('btn', 'btn-warning');
+  tdEditBtn.textContent = 'Edit';
+  tdEditBtn.addEventListener('click', function () {
+    const mainModal = $('#contactEditModal');
+    mainModal.modal('toggle');
 
-    const tdEditBtn = document.createElement('button')
-    tdEditBtn.className = 'btn btn-warning'
-    tdEditBtn.innerHTML = 'Edit'
-    tdEditBtn.addEventListener('click', function() {
-        
-        let mainModal = $('#contactEditModal')
-        mainModal.modal('toggle')
+    const editName = document.querySelector('#edit-name');
+    const editPhone = document.querySelector('#edit-phone');
+    const editEmail = document.querySelector('#edit-email');
 
-        let editName = document.querySelector('#edit-name')
-        let editPhone = document.querySelector('#edit-phone')
-        let editEmail = document.querySelector('#edit-email')
+    editName.value = contact.name;
+    editPhone.value = contact.phone ? contact.phone : '';
+    editEmail.value = contact.email ? contact.email : '';
 
-        editName.value = contact.name
-        editPhone.value = contact.phone ? contact.phone : ''
-        editEmail.value = contact.email ? contact.email : ''
+    const updateBtn = document.querySelector('#updateContact');
+    updateBtn.addEventListener('click', async function () {
+      try {
+        const res = await axios.put(`${BASE_URL}/${contact.id}`, {
+          name: editName.value,
+          phone: editPhone.value,
+          email: editEmail.value,
+        });
+        tdName.textContent = res.data.name;
+        tdPhone.textContent = res.data.phone;
+        tdEmail.textContent = res.data.email;
 
-        let updateBtn = document.querySelector('#updateContact')
-        updateBtn.addEventListener('click', function(){
-            axios.put(`${BASE_URL}/${contact.id}`, {
-                name: editName.value,
-                phone: editPhone.value,
-                email: editEmail.value
-            })
-            .then(res => {
-                tdName.innerHTML = res.data.name
-                tdPhone.innerHTML = res.data.phone
-                tdEmail.innerHTML = res.data.email
+        mainModal.modal('hide');
+      } catch (e) {
+        console.log(e);
+      }
+    });
+  });
+  tdActions.appendChild(tdEditBtn);
 
-                mainModal.modal('hide')
-            })
-            .catch(err => console.log(err))
-        })
+  const tdDeleteBtn = document.createElement('button');
+  tdDeleteBtn.className = 'btn btn-danger mx-1';
+  tdDeleteBtn.textContent = 'Delete';
+  tdDeleteBtn.addEventListener('click', async function () {
+    try {
+      const res = await axios.delete(`${BASE_URL}/${contact.id}`);
+      parentElement.removeChild(TR);
+    } catch (e) {
+      console.log(e);
+    }
+  });
 
-    })
-    tdActions.appendChild(tdEditBtn)
-
-    const tdDeleteBtn = document.createElement('button')
-    tdDeleteBtn.className = 'btn btn-danger mx-1'
-    tdDeleteBtn.innerHTML = 'Delete'
-    tdDeleteBtn.addEventListener('click', function(){
-        
-        axios.delete(`${BASE_URL}/${contact.id}`)
-            .then(res => {
-                parentElement.removeChild(TR)
-            })
-            .catch(err => console.log(err))
-
-    })
-    tdActions.appendChild(tdDeleteBtn)
-
-    TR.appendChild(tdActions)
-
-    parentElement.appendChild(TR)
+  tdActions.appendChild(tdDeleteBtn);
+  TR.appendChild(tdActions);
+  parentElement.appendChild(TR);
 }
+
+window.onload = async function () {
+  // Get Data From Server And Fill The Table When Page Loaded
+  const res = await axios.get(BASE_URL);
+  for (const contact of res.data) {
+    createTDElement(contact, tbody);
+    // setInterval(function () {  console.log(contact.name);}, 3000)
+  }
+};
