@@ -10,7 +10,7 @@ saveContactBtn.addEventListener('click', createNewContact);
 // Create New Contact Function
 async function createNewContact() {
   const name = document.querySelector('input[name=name]');
-  const phone = document.querySelector('input[name=phome]');
+  const phone = document.querySelector('input[name=phone]');
   const email = document.querySelector('input[name=email]');
 
   try {
