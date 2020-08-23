@@ -1,0 +1,51 @@
+{
+  "posts": [
+    {
+      "id": 1,
+      "title": "json-server",
+      "author": "typicode"
+    }
+  ],
+  "comments": [
+    {
+      "id": 1,
+      "body": "some comment",
+      "postId": 1
+    }
+  ],
+  "profile": {
+    "name": "typicode"
+  },
+  "contacts": [
+    {
+      "name": "omar ",
+      "phone": "121",
+      "email": "omi'@gmail.com",
+      "id": 21
+    },
+    {
+      "name": "samin",
+      "phone": "018",
+      "email": "samir@gmail.com",
+      "id": 22
+    },
+    {
+      "name": "jakiiiiiira ",
+      "phone": "121",
+      "email": "jakiiiiiiir@gmail.com",
+      "id": 24
+    },
+    {
+      "name": "usman",
+      "phone": "012165",
+      "email": "usman@gmail.com",
+      "id": 26
+    },
+    {
+      "name": "sagor",
+      "phone": "454",
+      "email": "sagor@smail.com",
+      "id": 27
+    }
+  ]
+}
